@@ -8,6 +8,9 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 
 include { FASTQC } from '../modules/fastqc'
 include { MULTIQC } from '../modules/multiqc'
+include { CALC_T_A } from '../modules/poly_at_calc'
+include { PLOT_T_A } from '../modules/poly_at_plot'
+
 
 workflow QC {
 
@@ -16,6 +19,7 @@ log.info """\
          ===================================
          samplesheet   : ${params.input}
          outdir        : ${params.outdir}
+         outdir_stats  : ${params.fastqc_outdir}
          fastqc_outdir : ${params.fastqc_outdir}
          multiqc_outdir: ${params.multiqc_outdir}
          ===================================
@@ -36,13 +40,18 @@ log.info """\
         .map { row -> tuple(row.sample, [row.fastq_1, row.fastq_2]) }
         .set { paired_fq_ch }
     //paired_fq_ch.view()
-    all_fq_ch = single_fq_ch.mix(paired_fq_ch)
+    //all_fq_ch = single_fq_ch.mix(paired_fq_ch)
     all_fq_ch.view()
 
-    fastqc_out_ch = FASTQC(all_fq_ch)
+    CALC_T_A(all_fq_ch)
+    CALC_T_A.out.collect().view()
+
+    PLOT_T_A(CALC_T_A.out.collect().join(' '))
+
+    //fastqc_out_ch = FASTQC(all_fq_ch)
     //fastqc_out_ch.view()
 
-    multiqc_out_ch = MULTIQC(fastqc_out_ch.collect())
+    //multiqc_out_ch = MULTIQC(fastqc_out_ch.collect())
     //multiqc_out_ch.view()
 
 }
@@ -50,4 +59,3 @@ log.info """\
 workflow.onComplete {
     log.info ( workflow.success ? "\nSUCCESS! Open the following report in your browser --> ${params.outdir}/${params.multiqc_outdir}/multiqc_report.html\n" : "FAIL" )
 }
-
