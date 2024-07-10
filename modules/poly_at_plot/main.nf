@@ -1,6 +1,8 @@
 process PLOT_T_A {
     label "process_low"
     
+    container "awsecr111/bioinfo:python3.10.12"
+    
     input:
     path(tables)
 
@@ -14,5 +16,10 @@ process PLOT_T_A {
     script:
     """
     plot_A_T.R ${tables.join(' ')}
+    
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python3 --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }
