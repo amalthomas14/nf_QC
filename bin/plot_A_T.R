@@ -18,12 +18,12 @@ suppressPackageStartupMessages({
     library(ggplot2)
     library(dplyr)
     library(tidyr)
+    library(stringr)
 })
 
 # Function to read and process individual TSV file
 read_sample <- function(file) {
   df <- read.delim(file, header = TRUE)
-  df$sample <- gsub("_output\\.tsv", "", basename(file))  # Extract sample name from file name
   return(df)
 }
 
@@ -32,11 +32,10 @@ read_sample <- function(file) {
 data_list <- lapply(files, read_sample)
 
 combined_data <- do.call(rbind, data_list)
-combined_data
+#combined_data
 # Save the combined data to a file
 write.table(combined_data, "combined_data_A_T.tsv", row.names = FALSE, quote = F,
             sep = "\t")
-
 # Pivot the data for easier plotting
 combined_data_long <- pivot_longer(combined_data, 
                                    cols = starts_with("T_") | starts_with("A_"), 
@@ -45,9 +44,11 @@ combined_data_long <- pivot_longer(combined_data,
 # Correct the bin format
 combined_data_long$bin <- gsub("\\.", "-", combined_data_long$bin)
 #combined_data_long
+# Wrap long legend names
+combined_data_long$sample <- str_wrap(combined_data_long$sample, width = 2.5)
 
 # Define bins for plotting
-bins <- unique(data_T$bin)
+bins <- unique(combined_data_long$bin)
 #bins
 bins_order <- c('0-5', '5-10', '10-15', '15-20', '20-25', '25-30', 
                 '30-35', '35-40', '40-45', '45-50', '50-55', '55-60', 
@@ -68,12 +69,19 @@ plot_nucleotide <- function(data, nucleotide) {
          color = "Sample") +
     theme_minimal() +
     theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, size = 5),  # Adjust the x-axis text size
+      axis.title.x = element_text(size = 9),  # Adjust the x-axis label size
+      axis.title.y = element_text(size = 9),  # Adjust the y-axis label size
+      plot.title = element_text(size = 10),    # Adjust the title size
+      legend.title = element_blank(),
+      legend.text = element_text(size = 5),  # Adjust the legend text size
       legend.position = "right",
-      legend.direction = "vertical",
-      axis.text.x = element_text(angle = 30, hjust = 1)
-      #panel.grid.major = element_blank(),
-      #panel.grid.minor = element_blank()
-    )
+      legend.key.size = unit(0.5, "cm"),  # Adjust the legend key size
+      legend.key.width = unit(0.5, "cm"),  # Adjust the legend key width
+      legend.key.height = unit(0.5, "cm"),  # Adjust the legend key height
+      legend.box.margin = margin(0, 0, 0, 0)
+    ) +
+    guides(color = guide_legend(ncol = 1))
 }
 
 # Plot for T

@@ -40,13 +40,13 @@ log.info """\
         .map { row -> tuple(row.sample, [row.fastq_1, row.fastq_2]) }
         .set { paired_fq_ch }
     //paired_fq_ch.view()
-    //all_fq_ch = single_fq_ch.mix(paired_fq_ch)
+    all_fq_ch = single_fq_ch.mix(paired_fq_ch)
     all_fq_ch.view()
 
     CALC_T_A(all_fq_ch)
     CALC_T_A.out.collect().view()
 
-    PLOT_T_A(CALC_T_A.out.collect().join(' '))
+    PLOT_T_A(CALC_T_A.out.collect())
 
     //fastqc_out_ch = FASTQC(all_fq_ch)
     //fastqc_out_ch.view()

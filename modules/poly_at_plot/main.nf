@@ -5,14 +5,14 @@ process PLOT_T_A {
     path(tables)
 
     output:
-    path("${params.outdir}/combined_data_A_T.tsv")
-    path("${params.outdir}/T_nucleotide_plot.pdf")
-    path("${params.outdir}/T_nucleotide_plot.png")
-    path("${params.outdir}/A_nucleotide_plot.pdf")
-    path("${params.outdir}/A_nucleotide_plot.png")
+    path("combined_data_A_T.tsv")
+    path("T_nucleotide_plot.pdf")
+    path("T_nucleotide_plot.png")
+    path("A_nucleotide_plot.pdf")
+    path("A_nucleotide_plot.png")
 
     script:
     """
-    Rscript plot_A_T.R ${tables}
+    plot_A_T.R ${tables.join(' ')}
     """
 }
