@@ -63,7 +63,7 @@ def process_fastq(f, bin_width):
 def write_output(sample, bins_T, bins_A, read_count, t_gte_90, a_gte_90, output_file, w):
     with open(output_file, 'w') as f:
         # Write the header
-        f.write("sample\ttotal_reads\tNucT_gte_per_90\tNucA_gte_per_90\tNucT_gte_num_90\tNucA_gte_num_90")
+        f.write("sample\ttotal_reads\tNucT_gte_pct_90\tNucA_gte_pct_90\tNucT_gte_num_90\tNucA_gte_num_90")
         for i in range(0, 100, w):
             bin_key = i
             bin_key_next = i + w
