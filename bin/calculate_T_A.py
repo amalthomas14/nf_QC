@@ -20,6 +20,8 @@ def process_fastq(f, bin_width):
     bins_T = defaultdict(int)
     bins_A = defaultdict(int)
     read_count = 0
+    t_gte_90 = 0
+    a_gte_90 = 0
 
     while True:
         header = f.readline().strip()
@@ -51,20 +53,26 @@ def process_fastq(f, bin_width):
 
         bins_T[bin_T] += 1
         bins_A[bin_A] += 1
+        if percent_T >= 90:
+            t_gte_90 += 1
+        if percent_A >= 90:
+            a_gte_90 += 1
     
-    return bins_T, bins_A, read_count
+    return bins_T, bins_A, read_count, t_gte_90, a_gte_90
 
-def write_output(sample, bins_T, bins_A, read_count, output_file, w):
+def write_output(sample, bins_T, bins_A, read_count, t_gte_90, a_gte_90, output_file, w):
     with open(output_file, 'w') as f:
         # Write the header
-        f.write("sample\ttotal_reads")
+        f.write("sample\ttotal_reads\tNucT_gte_per_90\tNucA_gte_per_90\tNucT_gte_num_90\tNucA_gte_num_90")
         for i in range(0, 100, w):
             bin_key = i
             bin_key_next = i + w
             f.write(f"\tT_{bin_key}-{bin_key_next}_pct\tT_{bin_key}-{bin_key_next}_num")
             f.write(f"\tA_{bin_key}-{bin_key_next}_pct\tA_{bin_key}-{bin_key_next}_num")
-        
-        f.write(f"\n{sample}\t{read_count}")
+
+        t_gte_per_90 = (t_gte_90 / read_count) * 100 if read_count > 0 else 0
+        a_gte_per_90 = (a_gte_90 / read_count) * 100 if read_count > 0 else 0
+        f.write(f"\n{sample}\t{read_count}\t{t_gte_per_90:.2f}\t{a_gte_per_90:.2f}\t{t_gte_90}\t{a_gte_90}")
         for i in range(0, 100, w):
             bin_key = i
             bin_key_next = i + w
@@ -99,7 +107,7 @@ if __name__ == "__main__":
         else:
             file_handle = open(input_file, 'r')
 
-    bins_T, bins_A, read_count = process_fastq(file_handle, bin_size)
+    bins_T, bins_A, read_count, t_gte_90, a_gte_90 = process_fastq(file_handle, bin_size)
     #print(bins_T)
     #print(bins_A)
     #print(read_count)
@@ -108,5 +116,5 @@ if __name__ == "__main__":
     if input_file != '-':
         file_handle.close()
     
-    write_output(sample_name, bins_T, bins_A, read_count, output_file, bin_size)
+    write_output(sample_name, bins_T, bins_A, read_count, t_gte_90, a_gte_90, output_file, bin_size)
     print(f"Output written to {output_file}") 
