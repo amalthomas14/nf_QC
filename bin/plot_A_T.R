@@ -90,8 +90,8 @@ plot_A <- plot_nucleotide(data_A, "A")
 
 # Save plot for T in PDF and PNG formats
 ggsave("T_nucleotide_plot.pdf", plot_T, dpi = 300, height = 7, width = 7, units = "cm")
-ggsave("T_nucleotide_plot.png", plot_T, dpi = 300, height = 7, width = 7, units = "cm")
+ggsave("T_nucleotide_plot.png", plot_T, dpi = 300, height = 7, width = 7, units = "cm", bg = "white")
 
 # Save plot for A in PDF and PNG formats
 ggsave("A_nucleotide_plot.pdf", plot_A, dpi = 300, height = 7, width = 7, units = "cm")
-ggsave("A_nucleotide_plot.png", plot_A, dpi = 300, height = 7, width = 7, units = "cm")
+ggsave("A_nucleotide_plot.png", plot_A, dpi = 300, height = 7, width = 7, units = "cm", bg = "white")
