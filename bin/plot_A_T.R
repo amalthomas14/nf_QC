@@ -60,7 +60,7 @@ data_T <- combined_data_long %>% filter(type == "T")
 data_A <- combined_data_long %>% filter(type == "A")
 
 # Plotting function
-plot_nucleotide <- function(data, nucleotide) {
+plot_nucleotide <- function(data, nucleotide, label_ncol=3) {
   ggplot(data, aes(x = bin, y = pct, group = sample, color = sample)) +
     geom_line() +
     labs(title = paste("%", nucleotide, "in reads"),
@@ -69,24 +69,46 @@ plot_nucleotide <- function(data, nucleotide) {
          color = "Sample") +
     theme_minimal() +
     theme(
-      axis.text.x = element_text(angle = 30, hjust = 1, size = 5),  # Adjust the x-axis text size
-      axis.title.x = element_text(size = 9),  # Adjust the x-axis label size
-      axis.title.y = element_text(size = 9),  # Adjust the y-axis label size
-      plot.title = element_text(size = 10),    # Adjust the title size
+      axis.text.x = element_text(angle = 30, hjust = 1, size = 8),  # Adjust the x-axis text size
+      axis.title.x = element_text(size = 12),  # Adjust the x-axis label size
+      axis.title.y = element_text(size = 12),  # Adjust the y-axis label size
+      plot.title = element_text(size = 12),    # Adjust the title size
       legend.title = element_blank(),
-      legend.text = element_text(size = 5),  # Adjust the legend text size
+      legend.text = element_text(size = 6),  # Adjust the legend text size
       legend.position = "right",
       legend.key.size = unit(0.5, "cm"),  # Adjust the legend key size
       legend.key.width = unit(0.5, "cm"),  # Adjust the legend key width
       legend.key.height = unit(0.5, "cm"),  # Adjust the legend key height
       legend.box.margin = margin(0, 0, 0, 0)
     ) +
-    guides(color = guide_legend(ncol = 1))
+    guides(color = guide_legend(ncol = label_ncol))
 }
 
+# Plotting function
+plot_nucleotide_nolegend <- function(data, nucleotide) {
+  ggplot(data, aes(x = bin, y = pct, group = sample, color = sample)) +
+    geom_line() +
+    labs(title = paste("%", nucleotide, "in reads"),
+         x = paste("%", nucleotide),
+         y = "Percentage of total reads",
+         color = "Sample") +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, size = 8),  # Adjust the x-axis text size
+      axis.title.x = element_text(size = 12),  # Adjust the x-axis label size
+      axis.title.y = element_text(size = 12),  # Adjust the y-axis label size
+      plot.title = element_text(size = 12),    # Adjust the title size
+      legend.title = element_blank(),
+      legend.text = element_text(size = 6),  # Adjust the legend text size
+       legend.position = "none"  # Remove the legend
+    )
+}
 # Plot for T
 plot_T <- plot_nucleotide(data_T, "T")
 plot_A <- plot_nucleotide(data_A, "A")
+
+plot_T_nolegend <- plot_nucleotide_nolegend(data_T, "T")
+plot_A_nolegend <- plot_nucleotide_nolegend(data_A, "A")
 
 # Save plot for T in PDF and PNG formats
 ggsave("T_nucleotide_plot.pdf", plot_T, dpi = 300, height = 7, width = 7, units = "cm")
@@ -95,3 +117,9 @@ ggsave("T_nucleotide_plot.png", plot_T, dpi = 300, height = 7, width = 7, units 
 # Save plot for A in PDF and PNG formats
 ggsave("A_nucleotide_plot.pdf", plot_A, dpi = 300, height = 7, width = 7, units = "cm")
 ggsave("A_nucleotide_plot.png", plot_A, dpi = 300, height = 7, width = 7, units = "cm", bg = "white")
+
+ggsave("T_nucleotide_plot_nolegend.pdf", plot_T_nolegend, dpi = 300)
+ggsave("T_nucleotide_plot_nolegend.png", plot_T_nolegend, dpi = 300, bg = "white")
+
+ggsave("A_nucleotide_plot_nolegend.pdf", plot_A_nolegend, dpi = 300)
+ggsave("A_nucleotide_plot_nolegend.png", plot_A_nolegend, dpi = 300, bg = "white")
