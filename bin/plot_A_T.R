@@ -60,7 +60,7 @@ data_T <- combined_data_long %>% filter(type == "T")
 data_A <- combined_data_long %>% filter(type == "A")
 
 # Plotting function
-plot_nucleotide <- function(data, nucleotide, label_ncol=3) {
+plot_nucleotide <- function(data, nucleotide, label_ncol=1) {
   ggplot(data, aes(x = bin, y = pct, group = sample, color = sample)) +
     geom_line() +
     labs(title = paste("%", nucleotide, "in reads"),
