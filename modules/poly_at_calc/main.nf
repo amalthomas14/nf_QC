@@ -13,6 +13,6 @@ process CALC_T_A {
     script:
     //println "[CALC_T_A]:$sample_id:${fastq_files}"
     """
-    zcat ${fastq_files.join(' ')} | calculate_T_A.py ${sample_id} -
+    gzip -d -c ${fastq_files.join(' ')} | calculate_T_A.py ${sample_id} -
     """
 }

@@ -28,7 +28,7 @@ def process_fastq(f, bin_width):
         if not header:
             break
         if header[0] != "@":
-            print(f"Error\n{file_path}:header line not starting with @")
+            print(f"Error!!!\nheader line not starting with @")
             print(header, "\n")
             sys.exit(1)
         seq = f.readline().strip().upper()

@@ -19,13 +19,37 @@ log.info """\
          ===================================
          samplesheet   : ${params.input}
          outdir        : ${params.outdir}
-         outdir_stats  : ${params.fastqc_outdir}
+         outdir_stats  : ${params.outdir_stats}
          fastqc_outdir : ${params.fastqc_outdir}
          multiqc_outdir: ${params.multiqc_outdir}
          ===================================
          """
          .stripIndent()
     
+    Channel
+        .fromPath(params.input, checkIfExists: true)
+        .splitCsv(header: true)
+        .filter { it.fastq_2 == "" }
+        .map { row -> tuple(row.sample, [row.fastq_1]) }
+        .groupTuple()
+	.map { sample, fastqs -> tuple(sample, fastqs.flatten()) }   
+        .set { single_fq_ch }
+    //single_fq_ch.view()
+    Channel
+        .fromPath(params.input, checkIfExists: true)
+        .splitCsv(header: true)
+        .filter {it.fastq_2 != ""}
+        .map { row -> tuple(row.sample, [row.fastq_1, row.fastq_2]) }
+	.groupTuple()
+	.map { sample, fastqs -> tuple(sample, fastqs.flatten()) }
+        .set { paired_fq_ch }
+
+    //paired_fq_ch.view()
+    all_fq_ch = single_fq_ch.mix(paired_fq_ch)
+		.groupTuple()
+		.map { sample, fastqs -> tuple(sample, fastqs.flatten()) }
+    all_fq_ch.view()
+/*
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header: true)
@@ -42,7 +66,7 @@ log.info """\
     //paired_fq_ch.view()
     all_fq_ch = single_fq_ch.mix(paired_fq_ch)
     all_fq_ch.view()
-
+*/
     CALC_T_A(all_fq_ch)
     CALC_T_A.out.collect().view()
 
