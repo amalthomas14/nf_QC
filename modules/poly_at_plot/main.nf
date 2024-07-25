@@ -12,6 +12,10 @@ process PLOT_T_A {
     path("T_nucleotide_plot.png")
     path("A_nucleotide_plot.pdf")
     path("A_nucleotide_plot.png")
+    path("T_nucleotide_plot_nolegend.pdf")
+    path("T_nucleotide_plot_nolegend.png")
+    path("A_nucleotide_plot_nolegend.pdf")
+    path("A_nucleotide_plot_nolegend.png")
 
     script:
     """
