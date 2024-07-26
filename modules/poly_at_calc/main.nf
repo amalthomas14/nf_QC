@@ -11,10 +11,11 @@ process CALC_T_A {
     path "stats_A_T_*.tsv"
 
     script:
-    def temp_file = "${sample_id}" + "_combined"
+    def input_files = fastq_files.collect { "-i ${it}" }.join(" ")
+    def output_file = "stats_A_T_${sample_id}.tsv"
+    println "[CALC_T_A]:$sample_id:${input_files}"
     //println "[CALC_T_A]:$sample_id:${fastq_files}"
     """
-    cat ${fastq_files.join(' ')} > ${temp_file}
-    calculate_T_A.py ${sample_id} ${temp_file}
+    calculate_T_A.py -s ${sample_id} -o ${output_file} ${input_files}
     """
 }

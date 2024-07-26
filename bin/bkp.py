@@ -6,7 +6,6 @@ import gzip
 import sys
 import os
 from collections import defaultdict
-import argparse
 
 def calculate_nucleotide_percentage(seq, nucleotide):
     count = seq.count(nucleotide)
@@ -17,19 +16,31 @@ def bin_percentage(percentage, w):
         return 100 - w
     return int(percentage // w) * w
 
-def process_fastq(file_handle, bins_T, bins_A, t_gte_90, a_gte_90, read_count, bin_width):
+def process_fastq(f, bin_width):
+    bins_T = defaultdict(int)
+    bins_A = defaultdict(int)
+    read_count = 0
+    t_gte_90 = 0
+    a_gte_90 = 0
+
     while True:
-        header = file_handle.readline().strip()
-        if not header:
+        header = f.readline().strip()
+        if not header or header == "" or header =="\n":
             break
         if header[0] != "@":
             print(f"Error!!!\nheader line not starting with @")
             print(header, "\n")
+            #print(f.readline().strip())
+            #print(f.readline().strip())
+            #print(f.readline().strip())
+            #print(f.readline().strip())
+            #print(f.readline().strip())
             continue
             #sys.exit(1)
-        seq = file_handle.readline().strip().upper()
-        plus = file_handle.readline().strip()
-        qual = file_handle.readline().strip()
+        seq = f.readline().strip().upper()
+        #print(seq)
+        plus = f.readline().strip()
+        qual = f.readline().strip()
 
         if not seq:
             break
@@ -38,9 +49,13 @@ def process_fastq(file_handle, bins_T, bins_A, t_gte_90, a_gte_90, read_count, b
 
         percent_T = calculate_nucleotide_percentage(seq, 'T')
         percent_A = calculate_nucleotide_percentage(seq, 'A')
+        #print("% T", percent_T)
+        #print("% T", percent_A)
 
         bin_T = bin_percentage(percent_T, bin_width)
         bin_A = bin_percentage(percent_A, bin_width)
+        #print("bin T", bin_T)
+        #print("bin A", bin_A)
 
         bins_T[bin_T] += 1
         bins_A[bin_A] += 1
@@ -72,47 +87,48 @@ def write_output(sample, bins_T, bins_A, read_count, t_gte_90, a_gte_90, output_
             f.write(f"\t{percentage_T:.2f}")
             f.write(f"\t{bins_T[bin_key]}")
             f.write(f"\t{percentage_A:.2f}")
-            f.write(f"\t{bins_A[bin_key]}")
+            f.write(f"\t{bins_A[bin_key]}") 
         f.write("\n")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Calculate A and T percentages in fastq files')
-    parser.add_argument('-s', '--sample', help='Sample name')
-    parser.add_argument('-o', '--output_file', help='Output file name')
-    parser.add_argument('-i', '--input', action='append', required=True, help='Input fastq file(s)')
-
-    args = parser.parse_args()
-
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <output name> <sample>")
+        sys.exit(1)
+    
     bin_size = 5
-    bins_T = defaultdict(int)
-    bins_A = defaultdict(int)
-    read_count = 0
-    t_gte_90 = 0
-    a_gte_90 = 0
 
-    for input_file in args.input:
-        if input_file == '-':
-            file_handle = sys.stdin
-            base_name = 'stdin'
-            print("Input provided as STDIN")
-        else:
-            print(f"Processing input file: {input_file}")
-            try:
-                file_handle = gzip.open(input_file, 'rt')
-                file_handle.read(1)  # Attempt to read to verify if it's gzipped
-                file_handle.seek(0)  # Reset the file pointer after the test read
-                print("Input file is gzipped")
-            except (OSError, gzip.BadGzipFile):
-                print("Input file is NOT gzipped")
-                file_handle = open(input_file, 'r')
-        
-        bins_T, bins_A, read_count, t_gte_90, a_gte_90 = process_fastq(
-            file_handle, bins_T, bins_A, t_gte_90, a_gte_90, read_count, bin_size
-        )
-        
-        # Close the file if it's not stdin
-        if input_file != '-':
-            file_handle.close()
+    sample_name = sys.argv[1]
+    input_file = sys.argv[2]
+    
+    output_file = "stats_A_T_" + sample_name + ".tsv"
+    
+    if input_file == '-':
+        file_handle = sys.stdin
+        base_name = 'stdin'
+        print("Input provided as STDIN")
+    else:
+        print("Input provided as a file")
+        try:
+            file_handle = gzip.open(input_file, 'rt')
+            file_handle.read(1)  # Attempt to read to verify if it's gzipped
+            file_handle.seek(0)  # Reset the file pointer after the test read
+            print("Input file is gzipped")		
+        except (OSError, gzip.BadGzipFile):
+            print("Input file is NOT gzipped")		
+            file_handle = open(input_file, 'r')
+        #if input_file.endswith('.gz'):
+        #    file_handle = gzip.open(input_file, 'rt')
+        #else:
+        #    file_handle = open(input_file, 'r')
 
-    write_output(args.sample, bins_T, bins_A, read_count, t_gte_90, a_gte_90, args.output_file, bin_size)
-    print(f"Output written to {args.output_file}")
+    bins_T, bins_A, read_count, t_gte_90, a_gte_90 = process_fastq(file_handle, bin_size)
+    #print(bins_T)
+    #print(bins_A)
+    #print(read_count)
+    
+    # Close the file if it's not stdin
+    if input_file != '-':
+        file_handle.close()
+    
+    write_output(sample_name, bins_T, bins_A, read_count, t_gte_90, a_gte_90, output_file, bin_size)
+    print(f"Output written to {output_file}") 
