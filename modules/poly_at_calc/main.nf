@@ -1,6 +1,6 @@
 process CALC_T_A {
     tag "calculate_T_A on $sample_id"
-    label "process_low"
+    label "process_med"
 
     container "awsecr111/bioinfo:python3.10.12"
     
