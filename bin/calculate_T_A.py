@@ -99,13 +99,21 @@ if __name__ == "__main__":
     if input_file == '-':
         file_handle = sys.stdin
         base_name = 'stdin'
-        print("Input provided as STDIN")		
+        print("Input provided as STDIN")
     else:
         print("Input provided as a file")
-        if input_file.endswith('.gz'):
+        try:
             file_handle = gzip.open(input_file, 'rt')
-        else:
+            file_handle.read(1)  # Attempt to read to verify if it's gzipped
+            file_handle.seek(0)  # Reset the file pointer after the test read
+            print("Input file is gzipped")		
+        except (OSError, gzip.BadGzipFile):
+            print("Input file is NOT gzipped")		
             file_handle = open(input_file, 'r')
+        #if input_file.endswith('.gz'):
+        #    file_handle = gzip.open(input_file, 'rt')
+        #else:
+        #    file_handle = open(input_file, 'r')
 
     bins_T, bins_A, read_count, t_gte_90, a_gte_90 = process_fastq(file_handle, bin_size)
     #print(bins_T)
