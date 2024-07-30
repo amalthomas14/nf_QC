@@ -11,11 +11,13 @@ process CALC_T_A {
     path "stats_A_T_*.tsv"
 
     script:
-    def input_files = fastq_files.collect { "-i ${it}" }.join(" ")
-    def output_file = "stats_A_T_${sample_id}.tsv"
-    println "[CALC_T_A]:$sample_id:${input_files}"
-    //println "[CALC_T_A]:$sample_id:${fastq_files}"
+    //def output_file = "stats_A_T_${sample_id}.tsv"
+    //def list_size   = fastq_files.size()
+    //println "[CALC_T_A]:$sample_id:${list_size}"
+    println "[CALC_T_A]:$sample_id:${fastq_files}"
     """
-    calculate_T_A.py -s ${sample_id} -o ${output_file} ${input_files}
+    gzip -cd ${fastq_files.join(' ')} > temp_file
+    cat temp_file | calculate_T_A.py ${sample_id} -
+    rm temp_file
     """
 }
